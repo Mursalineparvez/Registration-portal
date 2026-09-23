@@ -38,10 +38,14 @@ import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,6 +61,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.StudentEntity
 import com.example.ui.components.StudentPerformanceDashboardComponent
+import com.example.ui.components.StudentResultDashboardComponent
 import com.example.ui.theme.BdjsoEmerald
 import com.example.ui.theme.BdjsoRed
 import com.example.ui.theme.ElectricCyan
@@ -81,6 +86,7 @@ fun StudentDashboardScreen(
     val studentResult = results.find { it.studentRegistrationId == currentRegId }
 
     var showAdmitCardDialog by remember { mutableStateOf(false) }
+    var resultsTab by remember { mutableIntStateOf(0) }
 
     LazyColumn(
         modifier = modifier
@@ -301,13 +307,40 @@ fun StudentDashboardScreen(
             }
         }
 
-        // Performance Results & Overall Ranking Dashboard Component
+        // Results & Performance Section
         item {
-            StudentPerformanceDashboardComponent(
-                currentStudentResult = studentResult,
-                allPublishedResults = results,
-                onViewFullLeaderboard = { viewModel.navigateTo(AppScreen.RESULTS_LOOKUP) }
-            )
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                SegmentedButton(
+                    selected = resultsTab == 0,
+                    onClick = { resultsTab = 0 },
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+                ) {
+                    Text("My Standing", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                }
+                SegmentedButton(
+                    selected = resultsTab == 1,
+                    onClick = { resultsTab = 1 },
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+                ) {
+                    Text("All Exam Scores (Room DB)", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                }
+            }
+        }
+
+        if (resultsTab == 0) {
+            // Performance Results & Overall Ranking Dashboard Component
+            item {
+                StudentPerformanceDashboardComponent(
+                    currentStudentResult = studentResult,
+                    allPublishedResults = results,
+                    onViewFullLeaderboard = { resultsTab = 1 }
+                )
+            }
+        } else {
+            // Formatted Exam Scores List backed by Room Database
+            item {
+                StudentResultDashboardComponent(viewModel = viewModel)
+            }
         }
 
         // Quick Navigation & Actions
@@ -421,7 +454,7 @@ fun StudentDashboardScreen(
 }
 
 @Composable
-fun DetailRow(label: String, value: String) {
+private fun DetailRow(label: String, value: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

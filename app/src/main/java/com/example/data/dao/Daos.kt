@@ -195,8 +195,20 @@ interface ExamAttemptDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAttempt(attempt: ExamAttemptEntity): Long
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAttempts(attempts: List<ExamAttemptEntity>)
+
     @Update
     suspend fun updateAttempt(attempt: ExamAttemptEntity)
+
+    @Query("UPDATE exam_attempts SET status = :status WHERE id = :id")
+    suspend fun updateAttemptStatus(id: Long, status: String)
+
+    @Query("UPDATE exam_attempts SET score = :score, status = :status WHERE id = :id")
+    suspend fun updateAttemptScoreAndStatus(id: Long, score: Double, status: String)
+
+    @Query("DELETE FROM exam_attempts WHERE id = :id")
+    suspend fun deleteAttempt(id: Long)
 }
 
 @Dao
@@ -224,6 +236,9 @@ interface ResultDao {
 
     @Query("UPDATE results SET selectionStatus = :status WHERE id = :resultId")
     suspend fun updateSelectionStatus(resultId: Long, status: String)
+
+    @Query("DELETE FROM results WHERE id = :id")
+    suspend fun deleteResult(id: Long)
 }
 
 @Dao

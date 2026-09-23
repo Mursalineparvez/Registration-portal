@@ -28,18 +28,43 @@ import com.example.model.OlympiadCategory
 import com.example.model.QuestionType
 import com.example.model.QuizQuestion
 import com.example.model.UserProfile
+import com.example.ui.components.CentralizedAdminDashboardComponent
 import com.example.ui.components.QuestionDiagram
 import com.example.ui.theme.*
+import com.example.ui.viewmodel.BdjsoViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDashboardScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: BdjsoViewModel = viewModel()
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) } // 0: Questions, 1: Stats, 2: Users
+    var selectedTab by remember { mutableIntStateOf(0) } // 0: Stats, 1: Questions, 2: Users
     var questionPage by remember { mutableIntStateOf(1) } // 1: Primary (PDF Page 6-7), 2: Junior (PDF Page 14)
     var userSearchQuery by remember { mutableStateOf("") }
     var expandedAnswers by remember { mutableStateOf(setOf<Int>()) }
+    var showTotalInstitutesDialog by remember { mutableStateOf(false) }
+
+    val top15Institutes = remember {
+        listOf(
+            InstituteStat(1, "Rangdhanu Model School", 504, "4%", "Dinajpur", Color(0xFF6B21A8)),
+            InstituteStat(2, "Cantonment Public School and College, Saidpur", 170, "1%", "Nilphamari", Color(0xFF2DD4BF)),
+            InstituteStat(3, "Cantonment Public School and College Saidpur", 152, "1%", "Nilphamari", Color(0xFF14B8A6)),
+            InstituteStat(4, "Birol Residential Public School", 145, "1%", "Dinajpur", Color(0xFF0F766E)),
+            InstituteStat(5, "Savar Cantonment public school and College", 138, "1%", "Dhaka", Color(0xFF115E59)),
+            InstituteStat(6, "Rajuk Uttara Model College", 109, "1%", "Dhaka", Color(0xFFA3E635)),
+            InstituteStat(7, "Birol city school and college", 104, "1%", "Dinajpur", Color(0xFF99F6E4)),
+            InstituteStat(8, "Birol Green School", 91, "1%", "Dinajpur", Color(0xFFFCD34D)),
+            InstituteStat(9, "FARAKKABAD NUROL ISLAM SCHOOL AND COLLEGE", 90, "1%", "Dinajpur", Color(0xFFDC2626)),
+            InstituteStat(10, "BUNIADPUR IDEAL CADET SCHOOL", 88, "1%", "Dinajpur", Color(0xFF86EFAC)),
+            InstituteStat(11, "St. Joseph Higher Secondary School", 78, "1%", "Dhaka", Color(0xFF9333EA)),
+            InstituteStat(12, "Cantonment public school and college", 75, "1%", "Bogura", Color(0xFFEA580C)),
+            InstituteStat(13, "champion Academy", 72, "1%", "Dhaka", Color(0xFF06B6D4)),
+            InstituteStat(14, "Dhaka Residential Model College", 71, "1%", "Dhaka", Color(0xFF334155)),
+            InstituteStat(15, "Mymensingh Zilla school", 68, "1%", "Mymensingh", Color(0xFF701A75))
+        )
+    }
 
     val allUsers = remember { AuthRepository.getAllUsers() }
     val filteredUsers = remember(userSearchQuery) {
@@ -72,7 +97,7 @@ fun AdminDashboardScreen(
                             color = PrimaryTealDark
                         )
                         Text(
-                            text = "online.bdjso.org/admin",
+                            text = "online.bdjso.org/admin/stats",
                             fontSize = 11.sp,
                             color = TextSecondary
                         )
@@ -94,13 +119,14 @@ fun AdminDashboardScreen(
                 .fillMaxSize()
                 .background(BackgroundClean)
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = 14.dp)
                 .testTag("admin_dashboard_content"),
-            contentPadding = PaddingValues(bottom = 96.dp)
+            contentPadding = PaddingValues(bottom = 96.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Three Tabs matching PDF portal
+            // Three Tabs: Tab 0 is Registration Stat (Prominent & Default)
             item {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 TabRow(
                     selectedTabIndex = selectedTab,
                     containerColor = SurfaceWhite,
@@ -109,12 +135,12 @@ fun AdminDashboardScreen(
                     Tab(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
-                        text = { Text("Questions List", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
+                        text = { Text("📊 Registration Stat", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
                     )
                     Tab(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
-                        text = { Text("Registration Stat", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
+                        text = { Text("Questions List", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
                     )
                     Tab(
                         selected = selectedTab == 2,
@@ -122,11 +148,167 @@ fun AdminDashboardScreen(
                         text = { Text("Users (${allUsers.size})", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
                     )
                 }
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(4.dp))
             }
 
-            // === TAB 0: QUESTIONS LIST (from PDF Pages 6, 7, 14) ===
+            // === TAB 0: REGISTRATION STATS & CENTRALIZED DASHBOARD ===
             if (selectedTab == 0) {
+                // Centralized Operational Dashboard (Students, Submissions, Upcoming Events)
+                item {
+                    CentralizedAdminDashboardComponent(
+                        viewModel = viewModel,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                // Header (online.bdjso.org/admin/stats)
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Dashboard",
+                            fontSize = 12.sp,
+                            color = PortalMutedText,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = "Sunday, August 23, 2026 9:04:43 am",
+                            fontSize = 11.sp,
+                            color = PortalMutedText
+                        )
+                    }
+                }
+
+                // Title Banner: Total Registration: 11,621 | Total Institutes: 4,740
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        border = BorderStroke(1.dp, PortalBorderColor),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    Icons.Default.Assessment,
+                                    contentDescription = "Stats",
+                                    tint = PortalDarkText,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Registration Stat",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = PortalDarkText
+                                )
+                            }
+                            Text(
+                                text = "Sun, August 23, 2026",
+                                fontSize = 12.sp,
+                                color = PortalMutedText,
+                                modifier = Modifier.padding(start = 32.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(14.dp))
+                            HorizontalDivider(color = PortalBorderColor)
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(20.dp)
+                            ) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("• ", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = PortalDarkText)
+                                    Text("Total Registration: ", fontSize = 13.sp, color = PortalDarkText)
+                                    Text("11,621", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = PortalDarkText)
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text("• ", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = PortalDarkText)
+                                    Text("Total Institutes: ", fontSize = 13.sp, color = PortalDarkText)
+                                    Text("4,740", fontSize = 14.sp, fontWeight = FontWeight.ExtraBold, color = PortalDarkText)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 1. Old - New Student Ratio
+                item {
+                    WebDonutCard(
+                        title = "Old - New Student Ratio",
+                        slices = listOf(
+                            WebDonutSlice("Old", 141f, "1%", ChartBlue),
+                            WebDonutSlice("New", 11480f, "99%", ChartYellow)
+                        ),
+                        totalLabel = "Total Registration: 11,621"
+                    )
+                }
+
+                // 2. Registration by Gender
+                item {
+                    WebDonutCard(
+                        title = "Registration by Gender",
+                        slices = listOf(
+                            WebDonutSlice("Male", 7366f, "63%", ChartBlue),
+                            WebDonutSlice("Female", 4255f, "37%", ChartYellow)
+                        ),
+                        totalLabel = "Total Registration: 11,621"
+                    )
+                }
+
+                // 3. Registration by Category
+                item {
+                    WebDonutCard(
+                        title = "Registration by Category",
+                        slices = listOf(
+                            WebDonutSlice("Junior", 4900f, "42%", ChartBlue),
+                            WebDonutSlice("Secondary", 4511f, "39%", ChartYellow),
+                            WebDonutSlice("Primary", 2174f, "19%", ChartPurple),
+                            WebDonutSlice("Special", 36f, "0%", ChartPink)
+                        ),
+                        totalLabel = "Total Registration: 11,621"
+                    )
+                }
+
+                // 4. Registration by Division
+                item {
+                    WebDonutCard(
+                        title = "Registration by Division",
+                        slices = listOf(
+                            WebDonutSlice("Dhaka", 3597f, "31%", ChartBlue),
+                            WebDonutSlice("Rangpur", 2355f, "20%", ChartYellow),
+                            WebDonutSlice("Rajshahi", 1540f, "13%", Color(0xFFC084FC)),
+                            WebDonutSlice("Chattagram", 1538f, "13%", ChartRose),
+                            WebDonutSlice("Mymensingh", 970f, "8%", ChartTeal),
+                            WebDonutSlice("Khulna", 798f, "7%", ChartGreen),
+                            WebDonutSlice("Sylhet", 595f, "5%", ChartSkyBlue),
+                            WebDonutSlice("Barisal", 228f, "2%", ChartAmber)
+                        ),
+                        totalLabel = "Total Registration: 11,621"
+                    )
+                }
+
+                // 5. Registration by Class
+                item {
+                    WebClassBarChartCard()
+                }
+
+                // 6. Registration by Institute (Top: 15 of 4,740) // View Total List
+                item {
+                    WebInstituteBarChartCard(
+                        institutes = top15Institutes,
+                        onViewTotalList = { showTotalInstitutesDialog = true }
+                    )
+                }
+            }
+
+            // === TAB 1: QUESTIONS LIST (from PDF Pages 6, 7, 14) ===
+            if (selectedTab == 1) {
                 // Header and Pagination (like "Questions List" & page buttons 1, 2)
                 item {
                     Card(
@@ -327,95 +509,6 @@ fun AdminDashboardScreen(
                 }
             }
 
-            // === TAB 1: REGISTRATION STATS (from PDF Pages 2, 3, 4, 5) ===
-            if (selectedTab == 1) {
-                item {
-                    // Total Registration Card
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                        border = BorderStroke(1.dp, BorderLight)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(52.dp)
-                                    .clip(CircleShape)
-                                    .background(ServiceGreenBg),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(Icons.Default.People, contentDescription = null, tint = ServiceGreen, modifier = Modifier.size(26.dp))
-                            }
-                            Spacer(modifier = Modifier.width(14.dp))
-                            Column {
-                                Text("Total Registrations", fontSize = 12.sp, color = TextSecondary)
-                                Text("11,621", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold, color = PrimaryTealDark)
-                                Text("Total Institutes: 4,740 across 64 Districts", fontSize = 11.sp, color = TextMuted)
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                // Category & Gender Stats
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                        border = BorderStroke(1.dp, BorderLight)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Registration by Category", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = PrimaryTealDark)
-                            Spacer(modifier = Modifier.height(10.dp))
-                            StatProgressBar("Junior (Class 6 - 8)", "4,900 (42%)", 0.42f, ServiceGreen)
-                            StatProgressBar("Secondary (Class 9 - 10)", "4,511 (39%)", 0.39f, ServiceBlue)
-                            StatProgressBar("Primary (Class 3 - 5)", "2,174 (19%)", 0.19f, ServiceAmber)
-                            StatProgressBar("Special (Class 11 - 12)", "36 (0%)", 0.01f, Color.Gray)
-
-                            Spacer(modifier = Modifier.height(14.dp))
-                            HorizontalDivider(color = BorderLight)
-                            Spacer(modifier = Modifier.height(14.dp))
-
-                            Text("Registration by Gender", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = PrimaryTealDark)
-                            Spacer(modifier = Modifier.height(10.dp))
-                            StatProgressBar("Male", "7,366 (63%)", 0.63f, ServiceBlue)
-                            StatProgressBar("Female", "4,255 (37%)", 0.37f, Color(0xFFE91E63))
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
-                // Divisional Breakdown (Page 3 & 4)
-                item {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
-                        border = BorderStroke(1.dp, BorderLight)
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text("Top Divisions Registration", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = PrimaryTealDark)
-                            Spacer(modifier = Modifier.height(10.dp))
-                            StatProgressBar("Dhaka", "3,597 (31%)", 0.31f, PrimaryTeal)
-                            StatProgressBar("Rangpur", "2,355 (20%)", 0.20f, ServiceBlue)
-                            StatProgressBar("Rajshahi", "1,540 (13%)", 0.13f, ServiceGreen)
-                            StatProgressBar("Chattogram", "1,538 (13%)", 0.13f, ServiceAmber)
-                            StatProgressBar("Mymensingh", "973 (8%)", 0.08f, Color(0xFF8B5CF6))
-                            StatProgressBar("Khulna", "798 (7%)", 0.07f, Color(0xFFEC4899))
-                            StatProgressBar("Sylhet", "595 (5%)", 0.05f, Color(0xFF06B6D4))
-                            StatProgressBar("Barisal", "225 (2%)", 0.02f, Color(0xFFF97316))
-                        }
-                    }
-                }
-            }
-
             // === TAB 2: USERS LIST (from PDF Pages 1, 8, 10, 11, 12, 13) ===
             if (selectedTab == 2) {
                 item {
@@ -491,6 +584,13 @@ fun AdminDashboardScreen(
                     }
                 }
             }
+        }
+
+        if (showTotalInstitutesDialog) {
+            TotalInstitutesDialog(
+                topInstitutes = top15Institutes,
+                onDismiss = { showTotalInstitutesDialog = false }
+            )
         }
     }
 }

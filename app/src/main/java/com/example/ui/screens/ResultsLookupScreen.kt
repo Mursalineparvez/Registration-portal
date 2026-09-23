@@ -33,11 +33,15 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,6 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.components.StudentPerformanceDashboardComponent
+import com.example.ui.components.StudentResultDashboardComponent
 import com.example.ui.theme.BdjsoEmerald
 import com.example.ui.theme.ElectricCyan
 import com.example.ui.theme.OlympiadGold
@@ -69,6 +74,7 @@ fun ResultsLookupScreen(
     val currentRegId by viewModel.currentStudentRegId.collectAsStateWithLifecycle()
     val currentStudentResult = results.find { it.studentRegistrationId == currentRegId }
 
+    var dashboardMode by remember { mutableIntStateOf(0) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedCategoryFilter by remember { mutableStateOf("ALL") }
 
@@ -109,27 +115,53 @@ fun ResultsLookupScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            // Interactive Performance & Overall Ranking Summary Dashboard Component
+            // Dashboard Mode Switcher
             item {
-                StudentPerformanceDashboardComponent(
-                    currentStudentResult = currentStudentResult,
-                    allPublishedResults = results,
-                    onViewFullLeaderboard = { /* already on results lookup */ }
-                )
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    SegmentedButton(
+                        selected = dashboardMode == 0,
+                        onClick = { dashboardMode = 0 },
+                        shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+                    ) {
+                        Text("Score Dashboard", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                    }
+                    SegmentedButton(
+                        selected = dashboardMode == 1,
+                        onClick = { dashboardMode = 1 },
+                        shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+                    ) {
+                        Text("Merit Standings", fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                    }
+                }
             }
 
-            // Search Input
-            item {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    label = { Text("Search by Student Name, Reg ID, School, or District") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp)
-                )
-            }
+            if (dashboardMode == 0) {
+                // Room Database-backed Student Result Dashboard Component
+                item {
+                    StudentResultDashboardComponent(viewModel = viewModel)
+                }
+            } else {
+                // Interactive Performance & Overall Ranking Summary Dashboard Component
+                item {
+                    StudentPerformanceDashboardComponent(
+                        currentStudentResult = currentStudentResult,
+                        allPublishedResults = results,
+                        onViewFullLeaderboard = { /* already on results lookup */ }
+                    )
+                }
+
+                // Search Input
+                item {
+                    OutlinedTextField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
+                        label = { Text("Search by Student Name, Reg ID, School, or District") },
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                }
 
             // Category Filter Chips
             item {
@@ -314,6 +346,7 @@ fun ResultsLookupScreen(
                         }
                     }
                 }
+            }
             }
         }
     }

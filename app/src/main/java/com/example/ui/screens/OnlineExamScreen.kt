@@ -48,7 +48,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import com.example.ui.components.QuestionDiagramViewer
+import com.example.ui.components.*
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +62,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.theme.BdjsoEmerald
 import com.example.ui.theme.ElectricCyan
@@ -86,6 +88,18 @@ fun OnlineExamScreen(
     val lastAutosave by viewModel.lastAutosaveTime.collectAsStateWithLifecycle()
 
     var showSubmitDialog by remember { mutableStateOf(false) }
+    var showTimerDetailsDialog by remember { mutableStateOf(false) }
+    var isNotificationBannerDismissed by remember { mutableStateOf(false) }
+
+    val totalSeconds = remember(activeExam) {
+        ((activeExam?.durationMinutes ?: 60) * 60).coerceAtLeast(60)
+    }
+
+    LaunchedEffect(remainingSeconds) {
+        if (remainingSeconds == 900 || remainingSeconds == 600 || remainingSeconds == 300 || remainingSeconds == 120 || remainingSeconds == 60 || remainingSeconds == 30) {
+            isNotificationBannerDismissed = false
+        }
+    }
 
     val currentQuestion = questions.getOrNull(currentIndex)
     val totalQuestions = questions.size
@@ -123,30 +137,13 @@ fun OnlineExamScreen(
                     }
                 },
                 actions = {
-                    // Real-time server-synced countdown timer
-                    Row(
-                        modifier = Modifier
-                            .padding(end = 12.dp)
-                            .clip(RoundedCornerShape(20.dp))
-                            .background(if (isTimeWarning) Color(0xFFFEE2E2) else Color(0xFFE0F2FE))
-                            .padding(horizontal = 10.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Timer,
-                            contentDescription = null,
-                            tint = if (isTimeWarning) StatusDanger else ScienceTeal,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = formattedTime,
-                            fontWeight = FontWeight.ExtraBold,
-                            fontFamily = FontFamily.Monospace,
-                            fontSize = 14.sp,
-                            color = if (isTimeWarning) StatusDanger else PrimaryDarkNavy
-                        )
-                    }
+                    // Enhanced Exam Timer Badge with live urgency state and clickable detail view
+                    ExamTimerBadge(
+                        remainingSeconds = remainingSeconds,
+                        totalSeconds = totalSeconds,
+                        onClick = { showTimerDetailsDialog = true },
+                        modifier = Modifier.padding(end = 12.dp)
+                    )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface
@@ -160,6 +157,15 @@ fun OnlineExamScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
+            // Prominent Countdown Notification Banner for Milestone Warnings (<= 10 mins)
+            if (!isNotificationBannerDismissed && remainingSeconds in 1..600) {
+                ExamCountdownNotificationBanner(
+                    remainingSeconds = remainingSeconds,
+                    totalSeconds = totalSeconds,
+                    onDismiss = { isNotificationBannerDismissed = true },
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                )
+            }
             // Horizontal Question Palette / Navigation Strip
             Column(
                 modifier = Modifier
@@ -485,6 +491,41 @@ fun OnlineExamScreen(
                     )
                 }
             }
+        )
+    }
+
+    // Modal: Detailed Exam Timer & Pace Breakdown
+    if (showTimerDetailsDialog) {
+        Dialog(onDismissRequest = { showTimerDetailsDialog = false }) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                ExamTimerComponent(
+                    totalSeconds = totalSeconds,
+                    remainingSeconds = remainingSeconds,
+                    totalQuestions = totalQuestions,
+                    answeredQuestions = userAnswers.size,
+                    showNotificationBanner = true
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Button(
+                    onClick = { showTimerDetailsDialog = false },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryDarkNavy)
+                ) {
+                    Text("Return to Exam", fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+
+    // Modal: Automatic Notification when Time Expires
+    if (remainingSeconds <= 0) {
+        ExamTimeExpiredDialog(
+            onAutoSubmit = { viewModel.submitActiveExam() }
         )
     }
 }

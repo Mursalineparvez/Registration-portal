@@ -13,12 +13,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AdminPanelSettings
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.HowToReg
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.ManageAccounts
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
@@ -275,10 +277,10 @@ fun BdjsoMainApp(
                             )
                         )
                         NavigationBarItem(
-                            selected = currentScreen == AppScreen.ADMIN_STUDENTS,
-                            onClick = { viewModel.navigateTo(AppScreen.ADMIN_STUDENTS) },
-                            icon = { Icon(Icons.Default.People, contentDescription = "Students") },
-                            label = { Text("Students", fontSize = 10.sp) },
+                            selected = currentScreen == AppScreen.ADMIN_REGISTRATION_STATS,
+                            onClick = { viewModel.navigateTo(AppScreen.ADMIN_REGISTRATION_STATS) },
+                            icon = { Icon(Icons.Default.Assessment, contentDescription = "Stats") },
+                            label = { Text("Stats", fontSize = 10.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = ScienceTeal,
                                 selectedTextColor = ScienceTeal
@@ -295,20 +297,20 @@ fun BdjsoMainApp(
                             )
                         )
                         NavigationBarItem(
-                            selected = currentScreen == AppScreen.ADMIN_EXAMS,
-                            onClick = { viewModel.navigateTo(AppScreen.ADMIN_EXAMS) },
-                            icon = { Icon(Icons.Default.PlayArrow, contentDescription = "Exams") },
-                            label = { Text("Exams", fontSize = 10.sp) },
+                            selected = currentScreen == AppScreen.ADMIN_USERS,
+                            onClick = { viewModel.navigateTo(AppScreen.ADMIN_USERS) },
+                            icon = { Icon(Icons.Default.ManageAccounts, contentDescription = "Users") },
+                            label = { Text("Users", fontSize = 10.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = ScienceTeal,
                                 selectedTextColor = ScienceTeal
                             )
                         )
                         NavigationBarItem(
-                            selected = currentScreen == AppScreen.ADMIN_RESULTS,
-                            onClick = { viewModel.navigateTo(AppScreen.ADMIN_RESULTS) },
-                            icon = { Icon(Icons.Default.EmojiEvents, contentDescription = "Results") },
-                            label = { Text("Merit", fontSize = 10.sp) },
+                            selected = currentScreen == AppScreen.ADMIN_STUDENTS,
+                            onClick = { viewModel.navigateTo(AppScreen.ADMIN_STUDENTS) },
+                            icon = { Icon(Icons.Default.People, contentDescription = "Students") },
+                            label = { Text("Students", fontSize = 10.sp) },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = ScienceTeal,
                                 selectedTextColor = ScienceTeal

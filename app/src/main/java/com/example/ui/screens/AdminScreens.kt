@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Announcement
+import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
@@ -62,6 +64,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -84,6 +87,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.StudentEntity
+import com.example.ui.components.CentralizedAdminDashboardComponent
 import com.example.ui.theme.BdjsoEmerald
 import com.example.ui.theme.ElectricCyan
 import com.example.ui.theme.OlympiadGold
@@ -122,6 +126,16 @@ fun AdminDashboardScreen(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // Centralized Admin Dashboard Component (Summary of registered students, pending submissions, upcoming Olympiad events)
+        item {
+            CentralizedAdminDashboardComponent(
+                viewModel = viewModel,
+                onNavigateToStudents = { viewModel.navigateTo(AppScreen.ADMIN_STUDENTS) },
+                onNavigateToExams = { viewModel.navigateTo(AppScreen.ADMIN_EXAMS) },
+                onNavigateToResults = { viewModel.navigateTo(AppScreen.ADMIN_RESULTS) }
+            )
+        }
+
         // Admin Header
         item {
             Card(
@@ -252,6 +266,114 @@ fun AdminDashboardScreen(
                             Spacer(modifier = Modifier.width(4.dp))
                             Text("Users", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
                         }
+                    }
+                }
+            }
+        }
+
+        // Live Official BDJSO Registration Stats Showcase Card (Screenshot online.bdjso.org/admin/stats)
+        item {
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { viewModel.navigateTo(AppScreen.ADMIN_REGISTRATION_STATS) },
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = BorderStroke(1.dp, Color(0xFFE2E8F0)),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(BdjsoEmerald.copy(alpha = 0.15f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Default.Assessment,
+                                    contentDescription = null,
+                                    tint = BdjsoEmerald,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = "Registration Stat",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 15.sp,
+                                    color = Color(0xFF1E293B)
+                                )
+                                Text(
+                                    text = "online.bdjso.org/admin/stats • Sun, Aug 23, 2026",
+                                    fontSize = 10.sp,
+                                    color = Color(0xFF64748B)
+                                )
+                            }
+                        }
+
+                        Surface(
+                            color = BdjsoEmerald,
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                text = "LIVE DATA",
+                                color = Color.White,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    HorizontalDivider(color = Color(0xFFE2E8F0))
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text("Total Registration", fontSize = 11.sp, color = Color(0xFF64748B))
+                            Text("11,621", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = ScienceTeal)
+                            Text("Old: 141 • New: 11,480", fontSize = 10.sp, color = Color(0xFF64748B))
+                        }
+                        Column {
+                            Text("Total Institutes", fontSize = 11.sp, color = Color(0xFF64748B))
+                            Text("4,740", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = BdjsoEmerald)
+                            Text("Top: Rangdhanu (504)", fontSize = 10.sp, color = Color(0xFF64748B))
+                        }
+                        Column {
+                            Text("Gender Ratio", fontSize = 11.sp, color = Color(0xFF64748B))
+                            Text("63% / 37%", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = OlympiadGold)
+                            Text("Male: 7,366 • Fem: 4,255", fontSize = 10.sp, color = Color(0xFF64748B))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Button(
+                        onClick = { viewModel.navigateTo(AppScreen.ADMIN_REGISTRATION_STATS) },
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryDarkNavy),
+                        contentPadding = PaddingValues(vertical = 8.dp)
+                    ) {
+                        Icon(Icons.Default.ShowChart, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "View Full Stats (Districts, Upazilas, Trends & Charts)",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }

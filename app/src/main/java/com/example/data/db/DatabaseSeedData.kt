@@ -3,6 +3,7 @@ package com.example.data.db
 import com.example.data.model.AnnouncementEntity
 import com.example.data.model.AuditLogEntity
 import com.example.data.model.CategoryEntity
+import com.example.data.model.ExamAttemptEntity
 import com.example.data.model.ExamEntity
 import com.example.data.model.QuestionEntity
 import com.example.data.model.ResultEntity
@@ -1357,6 +1358,100 @@ object DatabaseSeedData {
             totalMarks = 20.0,
             negativeMarkingRate = 1.0,
             status = "DRAFT"
+        )
+    )
+
+    val examAttempts = listOf(
+        ExamAttemptEntity(
+            id = 1L,
+            examId = 1L,
+            studentRegistrationId = "BDJSO-2026-000101",
+            startTime = System.currentTimeMillis() - 7200000,
+            submitTime = System.currentTimeMillis() - 4500000,
+            answersJson = """{"1":"A","2":"B","3":"C","4":"D","5":"A","6":"C","7":"B"}""",
+            score = 28.0,
+            correctCount = 7,
+            wrongCount = 0,
+            unattemptedCount = 0,
+            status = "EVALUATED"
+        ),
+        ExamAttemptEntity(
+            id = 2L,
+            examId = 2L,
+            studentRegistrationId = "BDJSO-2026-000102",
+            startTime = System.currentTimeMillis() - 6000000,
+            submitTime = System.currentTimeMillis() - 3600000,
+            answersJson = """{"8":"B","9":"C","10":"A","11":"D","12":"A","13":"B","14":"C"}""",
+            score = 27.0,
+            correctCount = 7,
+            wrongCount = 0,
+            unattemptedCount = 0,
+            status = "EVALUATED"
+        ),
+        ExamAttemptEntity(
+            id = 3L,
+            examId = 2L,
+            studentRegistrationId = "BDJSO-2026-000104",
+            startTime = System.currentTimeMillis() - 3600000,
+            submitTime = System.currentTimeMillis() - 1800000,
+            answersJson = """{"8":"B","9":"C","10":"A","11":"B","12":"A","13":"B","14":"C"}""",
+            score = 23.0,
+            correctCount = 6,
+            wrongCount = 1,
+            unattemptedCount = 0,
+            status = "PENDING_REVIEW"
+        ),
+        ExamAttemptEntity(
+            id = 4L,
+            examId = 3L,
+            studentRegistrationId = "BDJSO-2026-000105",
+            startTime = System.currentTimeMillis() - 2700000,
+            submitTime = System.currentTimeMillis() - 900000,
+            answersJson = """{"15":"A","16":"C","17":"B","18":"D","19":"A","20":"C"}""",
+            score = 20.0,
+            correctCount = 5,
+            wrongCount = 1,
+            unattemptedCount = 1,
+            status = "PENDING_REVIEW"
+        ),
+        ExamAttemptEntity(
+            id = 5L,
+            examId = 1L,
+            studentRegistrationId = "BDJSO-2026-000106",
+            startTime = System.currentTimeMillis() - 1800000,
+            submitTime = System.currentTimeMillis() - 300000,
+            answersJson = """{"1":"A","2":"B","3":"D","4":"D","5":"A","6":"B"}""",
+            score = 19.0,
+            correctCount = 5,
+            wrongCount = 1,
+            unattemptedCount = 1,
+            status = "PENDING_REVIEW"
+        ),
+        ExamAttemptEntity(
+            id = 6L,
+            examId = 2L,
+            studentRegistrationId = "BDJSO-2026-000107",
+            startTime = System.currentTimeMillis() - 900000,
+            submitTime = System.currentTimeMillis() - 120000,
+            answersJson = """{"8":"B","9":"C","10":"A","11":"D","12":"A","13":"C"}""",
+            score = 23.0,
+            correctCount = 6,
+            wrongCount = 1,
+            unattemptedCount = 0,
+            status = "SUBMITTED"
+        ),
+        ExamAttemptEntity(
+            id = 7L,
+            examId = 3L,
+            studentRegistrationId = "BDJSO-2026-000108",
+            startTime = System.currentTimeMillis() - 600000,
+            submitTime = 0L,
+            answersJson = """{"15":"A","16":"B"}""",
+            score = 0.0,
+            correctCount = 2,
+            wrongCount = 0,
+            unattemptedCount = 5,
+            status = "IN_PROGRESS"
         )
     )
 

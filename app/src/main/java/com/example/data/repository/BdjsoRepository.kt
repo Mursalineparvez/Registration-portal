@@ -1,6 +1,7 @@
 package com.example.data.repository
 
 import com.example.data.db.BdjsoDatabase
+import com.example.data.db.DatabaseSeedData
 import com.example.data.model.AnnouncementEntity
 import com.example.data.model.AuditLogEntity
 import com.example.data.model.CategoryEntity
@@ -26,6 +27,7 @@ class BdjsoRepository(private val database: BdjsoDatabase) {
     val allSchools: Flow<List<SchoolEntity>> = database.schoolDao().getAllSchools()
     val allQuestions: Flow<List<QuestionEntity>> = database.questionDao().getAllQuestions()
     val allExams: Flow<List<ExamEntity>> = database.examDao().getAllExams()
+    val allExamAttempts: Flow<List<ExamAttemptEntity>> = database.examAttemptDao().getAllAttempts()
     val liveExam: Flow<ExamEntity?> = database.examDao().getLiveExamFlow()
     val publishedResults: Flow<List<ResultEntity>> = database.resultDao().getPublishedResults()
     val allResults: Flow<List<ResultEntity>> = database.resultDao().getAllResults()
@@ -53,7 +55,31 @@ class BdjsoRepository(private val database: BdjsoDatabase) {
         val userCount = database.userDao().getUserByUsername("super_admin")
         if (userCount == null) {
             BdjsoDatabase.seedDatabase(database)
+        } else {
+            val sampleAttempt = database.examAttemptDao().getAttempt(1L, "BDJSO-2026-000101")
+            if (sampleAttempt == null) {
+                database.examAttemptDao().insertAttempts(DatabaseSeedData.examAttempts)
+            }
         }
+    }
+
+    // Exam Attempt & Moderation operations
+    suspend fun updateAttemptStatus(id: Long, status: String, adminUser: String, role: String) {
+        database.examAttemptDao().updateAttemptStatus(id, status)
+        logAction("MODERATE_ATTEMPT", adminUser, role, "ATTEMPT-$id", "Status set to $status")
+    }
+
+    suspend fun evaluateAttempt(id: Long, score: Double, adminUser: String, role: String) {
+        database.examAttemptDao().updateAttemptScoreAndStatus(id, score, "EVALUATED")
+        logAction("EVALUATE_ATTEMPT", adminUser, role, "ATTEMPT-$id", "Graded with score $score")
+    }
+
+    suspend fun insertExamAttempt(attempt: ExamAttemptEntity): Long {
+        return database.examAttemptDao().insertAttempt(attempt)
+    }
+
+    suspend fun seedSampleAttempts() = withContext(Dispatchers.IO) {
+        database.examAttemptDao().insertAttempts(DatabaseSeedData.examAttempts)
     }
 
     // Student operations
@@ -231,6 +257,21 @@ class BdjsoRepository(private val database: BdjsoDatabase) {
     suspend fun updateSelectionStatus(resultId: Long, status: String, user: String, role: String) {
         database.resultDao().updateSelectionStatus(resultId, status)
         logAction("UPDATE_SELECTION_STATUS", user, role, "RESULT-$resultId", "Selection updated to $status")
+    }
+
+    suspend fun insertResult(result: ResultEntity): Long {
+        val id = database.resultDao().insertResult(result)
+        logAction("INSERT_RESULT", "ADMIN", "ADMIN", "RESULT-$id", "Inserted score for ${result.studentName}")
+        return id
+    }
+
+    suspend fun insertResults(results: List<ResultEntity>) {
+        database.resultDao().insertResults(results)
+    }
+
+    suspend fun deleteResult(id: Long) {
+        database.resultDao().deleteResult(id)
+        logAction("DELETE_RESULT", "ADMIN", "ADMIN", "RESULT-$id", "Deleted score entry")
     }
 
     // School operations

@@ -93,6 +93,7 @@ abstract class BdjsoDatabase : RoomDatabase() {
                 database.studentDao().insertStudents(DatabaseSeedData.students)
                 database.questionDao().insertQuestions(DatabaseSeedData.questions)
                 database.examDao().insertExams(DatabaseSeedData.exams)
+                database.examAttemptDao().insertAttempts(DatabaseSeedData.examAttempts)
                 database.resultDao().insertResults(DatabaseSeedData.results)
                 database.announcementDao().insertAnnouncements(DatabaseSeedData.announcements)
                 database.volunteerDao().insertVolunteers(DatabaseSeedData.volunteers)

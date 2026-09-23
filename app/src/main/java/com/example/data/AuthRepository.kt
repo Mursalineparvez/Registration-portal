@@ -121,8 +121,8 @@ object AuthRepository {
         "zakiirh124@gmail.com" to "student123"
     )
 
-    // Current authenticated user (null = logged out)
-    private val _currentUser = MutableStateFlow<UserProfile?>(null)
+    // Current authenticated user (default to Manager Md. Mursaline Parvez)
+    private val _currentUser = MutableStateFlow<UserProfile?>(managerUser)
     val currentUser: StateFlow<UserProfile?> = _currentUser.asStateFlow()
 
     fun getAllUsers(): List<UserProfile> = usersList.toList()

@@ -105,6 +105,9 @@ class BdjsoViewModel(application: Application) : AndroidViewModel(application) {
     val allResults: StateFlow<List<ResultEntity>> = repository.allResults
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val examAttempts: StateFlow<List<ExamAttemptEntity>> = repository.allExamAttempts
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val announcements: StateFlow<List<AnnouncementEntity>> = repository.announcements
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -419,6 +422,170 @@ class BdjsoViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun addExamResult(
+        studentRegId: String,
+        studentName: String,
+        categoryId: String,
+        schoolName: String,
+        district: String,
+        division: String,
+        physicsMarks: Double,
+        chemistryMarks: Double,
+        biologyMarks: Double,
+        mathMarks: Double,
+        totalMarks: Double,
+        percentage: Double,
+        rank: Int,
+        selectionStatus: String
+    ) {
+        viewModelScope.launch {
+            val result = ResultEntity(
+                examId = 1L,
+                studentRegistrationId = studentRegId,
+                studentName = studentName,
+                categoryId = categoryId,
+                schoolName = schoolName,
+                district = district,
+                division = division,
+                physicsMarks = physicsMarks,
+                chemistryMarks = chemistryMarks,
+                biologyMarks = biologyMarks,
+                mathMarks = mathMarks,
+                totalMarks = totalMarks,
+                percentage = percentage,
+                rank = rank,
+                selectionStatus = selectionStatus,
+                isPublished = true
+            )
+            repository.insertResult(result)
+            showSnackbar("Exam score for $studentName stored in Room database")
+        }
+    }
+
+    fun deleteExamResult(id: Long) {
+        viewModelScope.launch {
+            repository.deleteResult(id)
+            showSnackbar("Exam score removed from Room database")
+        }
+    }
+
+    fun seedSampleResultsIfEmpty() {
+        viewModelScope.launch {
+            val sampleResults = listOf(
+                ResultEntity(
+                    examId = 1L,
+                    studentRegistrationId = "BDJSO-2026-000101",
+                    studentName = "Aditi Roy Chowdhury",
+                    categoryId = "JUNIOR",
+                    schoolName = "Viqarunnisa Noon School & College",
+                    district = "Dhaka",
+                    division = "Dhaka",
+                    physicsMarks = 24.5,
+                    chemistryMarks = 23.0,
+                    biologyMarks = 25.0,
+                    mathMarks = 23.5,
+                    totalMarks = 96.0,
+                    percentage = 96.0,
+                    rank = 1,
+                    selectionStatus = "SELECTED",
+                    isPublished = true
+                ),
+                ResultEntity(
+                    examId = 1L,
+                    studentRegistrationId = "BDJSO-2026-000102",
+                    studentName = "Tanvir Ahmed",
+                    categoryId = "SECONDARY",
+                    schoolName = "Rajuk Uttara Model College",
+                    district = "Dhaka",
+                    division = "Dhaka",
+                    physicsMarks = 23.0,
+                    chemistryMarks = 24.0,
+                    biologyMarks = 22.5,
+                    mathMarks = 24.5,
+                    totalMarks = 94.0,
+                    percentage = 94.0,
+                    rank = 2,
+                    selectionStatus = "SELECTED",
+                    isPublished = true
+                ),
+                ResultEntity(
+                    examId = 1L,
+                    studentRegistrationId = "BDJSO-2026-000103",
+                    studentName = "Nusrat Jahan",
+                    categoryId = "PRIMARY",
+                    schoolName = "St. Francis Xavier's Green Herald",
+                    district = "Dhaka",
+                    division = "Dhaka",
+                    physicsMarks = 22.0,
+                    chemistryMarks = 21.5,
+                    biologyMarks = 24.0,
+                    mathMarks = 22.0,
+                    totalMarks = 89.5,
+                    percentage = 89.5,
+                    rank = 3,
+                    selectionStatus = "SELECTED",
+                    isPublished = true
+                ),
+                ResultEntity(
+                    examId = 1L,
+                    studentRegistrationId = "BDJSO-2026-000104",
+                    studentName = "Farhan Kabir",
+                    categoryId = "JUNIOR",
+                    schoolName = "Chittagong Collegiate School",
+                    district = "Chattogram",
+                    division = "Chattogram",
+                    physicsMarks = 21.0,
+                    chemistryMarks = 22.0,
+                    biologyMarks = 20.5,
+                    mathMarks = 21.5,
+                    totalMarks = 85.0,
+                    percentage = 85.0,
+                    rank = 4,
+                    selectionStatus = "SELECTED",
+                    isPublished = true
+                ),
+                ResultEntity(
+                    examId = 1L,
+                    studentRegistrationId = "BDJSO-2026-000105",
+                    studentName = "Sadia Islam",
+                    categoryId = "SECONDARY",
+                    schoolName = "Sylhet Govt. Pilot High School",
+                    district = "Sylhet",
+                    division = "Sylhet",
+                    physicsMarks = 19.5,
+                    chemistryMarks = 20.0,
+                    biologyMarks = 21.0,
+                    mathMarks = 19.0,
+                    totalMarks = 79.5,
+                    percentage = 79.5,
+                    rank = 5,
+                    selectionStatus = "WAITING_LIST",
+                    isPublished = true
+                ),
+                ResultEntity(
+                    examId = 1L,
+                    studentRegistrationId = "BDJSO-2026-000106",
+                    studentName = "Abrar Hossain",
+                    categoryId = "PRIMARY",
+                    schoolName = "Khulna Zilla School",
+                    district = "Khulna",
+                    division = "Khulna",
+                    physicsMarks = 18.0,
+                    chemistryMarks = 19.0,
+                    biologyMarks = 18.5,
+                    mathMarks = 17.5,
+                    totalMarks = 73.0,
+                    percentage = 73.0,
+                    rank = 6,
+                    selectionStatus = "WAITING_LIST",
+                    isPublished = true
+                )
+            )
+            repository.insertResults(sampleResults)
+            showSnackbar("Seeded 6 sample exam scores into Room database")
+        }
+    }
+
     fun addSchool(
         name: String,
         code: String,
@@ -569,6 +736,51 @@ class BdjsoViewModel(application: Application) : AndroidViewModel(application) {
     fun clearCache() {
         viewModelScope.launch {
             showSnackbar("Application and database caches cleared successfully")
+        }
+    }
+
+    fun moderateExamAttempt(attemptId: Long, newStatus: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.updateAttemptStatus(attemptId, newStatus, _currentStudentRegId.value, _currentRole.value)
+            showSnackbar("Submission #$attemptId marked as $newStatus")
+        }
+    }
+
+    fun approveAndEvaluateAttempt(attemptId: Long, score: Double) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.evaluateAttempt(attemptId, score, _currentStudentRegId.value, _currentRole.value)
+            showSnackbar("Submission #$attemptId approved & published with score $score")
+        }
+    }
+
+    fun seedExamAttemptsIfEmpty() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.seedSampleAttempts()
+            showSnackbar("Seeded sample exam submissions to Room DB")
+        }
+    }
+
+    fun verifyStudentDirectly(regId: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val student = repository.getStudent(regId)
+            if (student != null) {
+                repository.updateStudent(student.copy(status = "VERIFIED"), _currentStudentRegId.value, _currentRole.value)
+                showSnackbar("Student ${student.fullName} ($regId) verified!")
+            }
+        }
+    }
+
+    fun createAnnouncementEvent(title: String, description: String, date: String, tag: String = "EXAM") {
+        viewModelScope.launch(Dispatchers.IO) {
+            val entity = AnnouncementEntity(
+                title = title,
+                description = description,
+                tag = tag,
+                publishDate = date,
+                status = "PUBLISHED"
+            )
+            repository.insertAnnouncement(entity, _currentStudentRegId.value, _currentRole.value)
+            showSnackbar("Olympiad event announcement published!")
         }
     }
 }
