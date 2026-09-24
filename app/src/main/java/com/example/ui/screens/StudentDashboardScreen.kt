@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.model.StudentEntity
 import com.example.ui.components.StudentPerformanceDashboardComponent
+import com.example.ui.components.StudentProfileComponent
 import com.example.ui.components.StudentResultDashboardComponent
 import com.example.ui.theme.BdjsoEmerald
 import com.example.ui.theme.BdjsoRed
@@ -313,33 +315,55 @@ fun StudentDashboardScreen(
                 SegmentedButton(
                     selected = resultsTab == 0,
                     onClick = { resultsTab = 0 },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 3)
                 ) {
-                    Text("My Standing", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                    Text("My Standing", fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
                 }
                 SegmentedButton(
                     selected = resultsTab == 1,
                     onClick = { resultsTab = 1 },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 3)
                 ) {
-                    Text("All Exam Scores (Room DB)", fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+                    Text("Profile & History", fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
+                }
+                SegmentedButton(
+                    selected = resultsTab == 2,
+                    onClick = { resultsTab = 2 },
+                    shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3)
+                ) {
+                    Text("Leaderboard", fontWeight = FontWeight.SemiBold, fontSize = 11.sp)
                 }
             }
         }
 
-        if (resultsTab == 0) {
-            // Performance Results & Overall Ranking Dashboard Component
-            item {
-                StudentPerformanceDashboardComponent(
-                    currentStudentResult = studentResult,
-                    allPublishedResults = results,
-                    onViewFullLeaderboard = { resultsTab = 1 }
-                )
+        when (resultsTab) {
+            0 -> {
+                // Performance Results & Overall Ranking Dashboard Component
+                item {
+                    StudentPerformanceDashboardComponent(
+                        currentStudentResult = studentResult,
+                        allPublishedResults = results,
+                        onViewFullLeaderboard = { resultsTab = 2 }
+                    )
+                }
             }
-        } else {
-            // Formatted Exam Scores List backed by Room Database
-            item {
-                StudentResultDashboardComponent(viewModel = viewModel)
+            1 -> {
+                // Full Student Profile & Participation History Component
+                item {
+                    StudentProfileComponent(
+                        viewModel = viewModel,
+                        initialStudentRegId = currentRegId,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 550.dp, max = 850.dp)
+                    )
+                }
+            }
+            else -> {
+                // Formatted Exam Scores List backed by Room Database
+                item {
+                    StudentResultDashboardComponent(viewModel = viewModel)
+                }
             }
         }
 

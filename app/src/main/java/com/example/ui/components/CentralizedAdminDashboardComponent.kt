@@ -73,6 +73,7 @@ fun CentralizedAdminDashboardComponent(
 
     var activeTab by remember { mutableIntStateOf(0) } // 0: Overview, 1: Students, 2: Pending Submissions, 3: Olympiad Events
     var selectedSubmissionForReview by remember { mutableStateOf<ExamAttemptEntity?>(null) }
+    var selectedStudentProfileId by remember { mutableStateOf<String?>(null) }
     var showCreateEventDialog by remember { mutableStateOf(false) }
     var eventFilterCategory by remember { mutableStateOf("ALL") }
 
@@ -363,7 +364,8 @@ fun CentralizedAdminDashboardComponent(
                 specialCount = specialCount,
                 schoolsCount = schools.size,
                 onVerifyStudent = { regId -> viewModel.verifyStudentDirectly(regId) },
-                onViewAllStudents = onNavigateToStudents
+                onViewAllStudents = onNavigateToStudents,
+                onViewProfile = { regId -> selectedStudentProfileId = regId }
             )
             2 -> PendingSubmissionsContent(
                 attempts = examAttempts,
@@ -586,6 +588,15 @@ fun CentralizedAdminDashboardComponent(
                     Text("Cancel")
                 }
             }
+        )
+    }
+
+    // Modal: Comprehensive Student Profile & Participation History Dialog
+    selectedStudentProfileId?.let { regId ->
+        StudentProfileDialog(
+            viewModel = viewModel,
+            studentRegId = regId,
+            onDismiss = { selectedStudentProfileId = null }
         )
     }
 }
@@ -938,7 +949,8 @@ private fun RegisteredStudentsSummaryContent(
     specialCount: Int,
     schoolsCount: Int,
     onVerifyStudent: (String) -> Unit,
-    onViewAllStudents: () -> Unit
+    onViewAllStudents: () -> Unit,
+    onViewProfile: (String) -> Unit = {}
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
         // High Level Metrics
@@ -1065,19 +1077,34 @@ private fun RegisteredStudentsSummaryContent(
                                     horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Column(modifier = Modifier.weight(1f)) {
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable { onViewProfile(st.registrationId) }
+                                    ) {
                                         Text(st.fullName, fontWeight = FontWeight.Bold, fontSize = 12.sp, color = TextPrimary)
                                         Text("${st.registrationId} • ${st.categoryId} • ${st.district}", fontSize = 10.sp, color = TextSecondary)
                                     }
-                                    Button(
-                                        onClick = { onVerifyStudent(st.registrationId) },
-                                        colors = ButtonDefaults.buttonColors(containerColor = BdjsoEmerald),
-                                        shape = RoundedCornerShape(6.dp),
-                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                                    ) {
-                                        Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp))
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text("Verify", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        OutlinedButton(
+                                            onClick = { onViewProfile(st.registrationId) },
+                                            shape = RoundedCornerShape(6.dp),
+                                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 4.dp)
+                                        ) {
+                                            Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(12.dp))
+                                            Spacer(modifier = Modifier.width(2.dp))
+                                            Text("Dossier", fontSize = 10.sp)
+                                        }
+                                        Button(
+                                            onClick = { onVerifyStudent(st.registrationId) },
+                                            colors = ButtonDefaults.buttonColors(containerColor = BdjsoEmerald),
+                                            shape = RoundedCornerShape(6.dp),
+                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                                        ) {
+                                            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(14.dp))
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text("Verify", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                        }
                                     }
                                 }
                             }

@@ -68,16 +68,16 @@ object CsvExportUtil {
 
         // Rows
         for (st in filtered) {
-            val dateStr = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(st.createdAt))
+            val dateStr = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(st.registeredAt))
             sb.append(
                 listOf(
                     st.registrationId,
                     st.fullName,
-                    st.nameBangla,
+                    st.banglaName,
                     st.categoryId,
-                    st.classGrade,
+                    st.className,
                     st.gender,
-                    st.dateOfBirth,
+                    st.dob,
                     st.schoolName,
                     st.district,
                     st.division,

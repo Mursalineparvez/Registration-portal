@@ -786,6 +786,17 @@ fun AdminStudentsScreen(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("Reject", fontSize = 11.sp, color = StatusDanger)
                             }
+
+                            OutlinedButton(
+                                onClick = { selectedStudentDossier = s },
+                                modifier = Modifier.weight(1.2f),
+                                contentPadding = PaddingValues(vertical = 4.dp),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Icon(Icons.Default.History, contentDescription = null, modifier = Modifier.size(14.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("History & Profile", fontSize = 11.sp)
+                            }
                         }
                     }
                 }
@@ -793,29 +804,12 @@ fun AdminStudentsScreen(
         }
     }
 
-    // Student Detailed Dossier Modal
+    // Student Detailed Dossier & Participation History Modal
     selectedStudentDossier?.let { s ->
-        AlertDialog(
-            onDismissRequest = { selectedStudentDossier = null },
-            confirmButton = {
-                Button(onClick = { selectedStudentDossier = null }) {
-                    Text("Close")
-                }
-            },
-            title = { Text(s.fullName, fontWeight = FontWeight.Bold) },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Reg ID: ${s.registrationId}", fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold)
-                    Text("Bangla Name: ${s.banglaName}")
-                    Text("DOB: ${s.dob} • Gender: ${s.gender} • Blood: ${s.bloodGroup}")
-                    Text("School: ${s.schoolName} (${s.institutionType})")
-                    Text("Class: ${s.className} • Roll: ${s.studentRoll} • Category: ${s.categoryId}")
-                    Text("Location: ${s.upazila}, ${s.district}, ${s.division}")
-                    Text("Mobile: ${s.mobile} • Email: ${s.email}")
-                    Text("Guardian: ${s.guardianName} (${s.guardianRelation}) - ${s.guardianMobile}")
-                    Text("Status: ${s.status}", fontWeight = FontWeight.Bold, color = BdjsoEmerald)
-                }
-            }
+        com.example.ui.components.StudentProfileDialog(
+            viewModel = viewModel,
+            studentRegId = s.registrationId,
+            onDismiss = { selectedStudentDossier = null }
         )
     }
 }

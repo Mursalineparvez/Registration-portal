@@ -164,6 +164,10 @@ class BdjsoViewModel(application: Application) : AndroidViewModel(application) {
         _currentStudentRegId.value = regId
     }
 
+    fun getStudentFlow(regId: String): kotlinx.coroutines.flow.Flow<StudentEntity?> = repository.getStudentFlow(regId)
+    fun getStudentAttempts(regId: String): kotlinx.coroutines.flow.Flow<List<ExamAttemptEntity>> = repository.getStudentAttempts(regId)
+    fun getStudentResult(regId: String): kotlinx.coroutines.flow.Flow<ResultEntity?> = repository.getStudentResult(regId)
+
     fun navigateTo(screen: AppScreen) {
         _currentScreen.value = screen
     }

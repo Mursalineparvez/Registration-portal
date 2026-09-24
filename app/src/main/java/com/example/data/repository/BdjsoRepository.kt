@@ -85,6 +85,8 @@ class BdjsoRepository(private val database: BdjsoDatabase) {
     // Student operations
     fun getStudentFlow(regId: String): Flow<StudentEntity?> = database.studentDao().getStudentByRegIdFlow(regId)
     suspend fun getStudent(regId: String): StudentEntity? = database.studentDao().getStudentByRegId(regId)
+    fun getStudentAttempts(regId: String): Flow<List<ExamAttemptEntity>> = database.examAttemptDao().getAttemptsForStudent(regId)
+    fun getStudentResult(regId: String): Flow<ResultEntity?> = database.resultDao().getResultByStudent(regId)
 
     suspend fun registerStudent(student: StudentEntity): String {
         database.studentDao().insertStudent(student)
