@@ -88,7 +88,7 @@ fun ResultsScreen(
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
                         Icon(
-                            Icons.AutoMirrored.Filled.TrendingUp,
+                            Icons.Default.TrendingUp,
                             contentDescription = null,
                             modifier = Modifier.size(16.dp)
                         )

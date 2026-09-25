@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -335,7 +334,7 @@ fun DataVisualizationDashboardScreen(
                             title = "গড় স্কোর (Overall)",
                             value = "68.4%",
                             subtext = "27.4 / 40 নম্বর",
-                            icon = Icons.AutoMirrored.Filled.TrendingUp,
+                            icon = Icons.Default.TrendingUp,
                             color = BdjsoEmerald,
                             modifier = Modifier.weight(1f)
                         )

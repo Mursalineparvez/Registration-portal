@@ -282,7 +282,7 @@ fun HomeScreen(
                 ServiceListCard(
                     title = "ডাটা ভিজ্যুয়ালাইজেশন ড্যাশবোর্ড (Analytics)",
                     subtitle = "অংশগ্রহণ ট্রেন্ড ও বিষয়ভিত্তিক পরীক্ষার পারফরম্যান্স গ্রাফ (Recharts)",
-                    icon = Icons.AutoMirrored.Filled.TrendingUp,
+                    icon = Icons.Default.TrendingUp,
                     iconBgColor = Color(0xFFE0F2FE),
                     iconBorderColor = Color(0xFFBAE6FD),
                     iconTint = Color(0xFF0284C7),

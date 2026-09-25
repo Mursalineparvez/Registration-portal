@@ -25,7 +25,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.TrendingUp
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Biotech
 import androidx.compose.material.icons.filled.Calculate
@@ -541,7 +541,7 @@ private fun CohortComparisonCanvas(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        Icons.AutoMirrored.Filled.TrendingUp,
+                        Icons.Default.TrendingUp,
                         contentDescription = null,
                         tint = ScienceTeal,
                         modifier = Modifier.size(16.dp)

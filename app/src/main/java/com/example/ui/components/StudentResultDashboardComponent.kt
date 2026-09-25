@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -224,7 +223,7 @@ fun StudentResultDashboardComponent(
                 title = "Average Score",
                 value = String.format("%.1f", averageScore),
                 subtext = String.format("%.1f%% mean", averagePercentage),
-                icon = Icons.AutoMirrored.Filled.TrendingUp,
+                icon = Icons.Default.TrendingUp,
                 accentColor = ElectricCyan,
                 modifier = Modifier.weight(1f)
             )

@@ -37,9 +37,13 @@ class BdjsoRepository(private val database: BdjsoDatabase) {
     val auditLogs: Flow<List<AuditLogEntity>> = database.auditLogDao().getAllLogs()
     val systemSettings: Flow<List<SystemSettingEntity>> = database.systemSettingDao().getAllSettings()
     val users: Flow<List<UserEntity>> = database.userDao().getAllUsers()
+    val registeredStudents: Flow<List<UserEntity>> = database.userDao().getRegisteredStudents()
 
-    // User operations
+    // User operations (Registration & Profile Data)
     fun searchUsers(query: String): Flow<List<UserEntity>> = database.userDao().searchUsers(query)
+    fun getUserByRegistrationId(regId: String): Flow<UserEntity?> = database.userDao().getUserByRegistrationIdFlow(regId)
+    suspend fun findUserByRegistrationId(regId: String): UserEntity? = database.userDao().getUserByRegistrationId(regId)
+    fun getUsersByRegistrationStatus(status: String): Flow<List<UserEntity>> = database.userDao().getUsersByRegistrationStatus(status)
     suspend fun getUserById(id: Long): UserEntity? = database.userDao().getUserById(id)
     suspend fun updateUser(user: UserEntity, adminUser: String, role: String) {
         database.userDao().updateUser(user)
@@ -50,6 +54,33 @@ class BdjsoRepository(private val database: BdjsoDatabase) {
         logAction("DELETE_USER", adminUser, role, username, "Deleted user record")
     }
     suspend fun saveUser(user: UserEntity): Long = database.userDao().insertUser(user)
+    suspend fun registerUser(user: UserEntity): Long {
+        val id = database.userDao().insertUser(user)
+        logAction("REGISTER_USER", "SYSTEM", user.role, user.studentRegistrationId ?: user.username, "Registered user ${user.name}")
+        return id
+    }
+
+    // Exam Student Progress Tracking operations
+    fun getStudentExamProgress(studentRegistrationId: String): Flow<List<ExamEntity>> =
+        database.examDao().getExamsForStudent(studentRegistrationId)
+
+    fun getStudentInProgressExams(studentRegistrationId: String): Flow<List<ExamEntity>> =
+        database.examDao().getExamsInProgressForStudent(studentRegistrationId)
+
+    fun getStudentCompletedExams(studentRegistrationId: String): Flow<List<ExamEntity>> =
+        database.examDao().getCompletedExamsForStudent(studentRegistrationId)
+
+    suspend fun updateStudentExamProgress(
+        examId: Long,
+        progress: Int,
+        answered: Int,
+        score: Double,
+        completed: Boolean,
+        timeSpent: Long = 0L,
+        lastAttemptDate: String = ""
+    ) {
+        database.examDao().updateStudentExamProgress(examId, progress, answered, score, completed, timeSpent, lastAttemptDate)
+    }
 
     suspend fun ensureSeeded() = withContext(Dispatchers.IO) {
         val userCount = database.userDao().getUserByUsername("super_admin")

@@ -30,6 +30,18 @@ interface UserDao {
     @Query("SELECT * FROM users WHERE username = :username LIMIT 1")
     suspend fun getUserByUsername(username: String): UserEntity?
 
+    @Query("SELECT * FROM users WHERE studentRegistrationId = :regId OR registrationNumber = :regId LIMIT 1")
+    suspend fun getUserByRegistrationId(regId: String): UserEntity?
+
+    @Query("SELECT * FROM users WHERE studentRegistrationId = :regId OR registrationNumber = :regId LIMIT 1")
+    fun getUserByRegistrationIdFlow(regId: String): Flow<UserEntity?>
+
+    @Query("SELECT * FROM users WHERE role = 'STUDENT' ORDER BY id DESC")
+    fun getRegisteredStudents(): Flow<List<UserEntity>>
+
+    @Query("SELECT * FROM users WHERE registrationStatus = :status ORDER BY id DESC")
+    fun getUsersByRegistrationStatus(status: String): Flow<List<UserEntity>>
+
     @Query("SELECT * FROM users WHERE name LIKE '%' || :query || '%' OR username LIKE '%' || :query || '%' OR email LIKE '%' || :query || '%' OR mobile LIKE '%' || :query || '%' ORDER BY id DESC")
     fun searchUsers(query: String): Flow<List<UserEntity>>
 
@@ -164,6 +176,19 @@ interface ExamDao {
 
     @Query("SELECT * FROM exams WHERE status = 'LIVE' LIMIT 1")
     fun getLiveExamFlow(): Flow<ExamEntity?>
+
+    // Student Progress Tracking queries
+    @Query("SELECT * FROM exams WHERE studentRegistrationId = :studentRegistrationId ORDER BY id DESC")
+    fun getExamsForStudent(studentRegistrationId: String): Flow<List<ExamEntity>>
+
+    @Query("SELECT * FROM exams WHERE studentRegistrationId = :studentRegistrationId AND isCompleted = 0 ORDER BY id DESC")
+    fun getExamsInProgressForStudent(studentRegistrationId: String): Flow<List<ExamEntity>>
+
+    @Query("SELECT * FROM exams WHERE studentRegistrationId = :studentRegistrationId AND isCompleted = 1 ORDER BY id DESC")
+    fun getCompletedExamsForStudent(studentRegistrationId: String): Flow<List<ExamEntity>>
+
+    @Query("UPDATE exams SET progressPercentage = :progress, questionsAnswered = :answered, currentScore = :score, isCompleted = :completed, timeSpentSeconds = :timeSpent, lastAttemptDate = :lastAttemptDate WHERE id = :examId")
+    suspend fun updateStudentExamProgress(examId: Long, progress: Int, answered: Int, score: Double, completed: Boolean, timeSpent: Long, lastAttemptDate: String)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExam(exam: ExamEntity): Long

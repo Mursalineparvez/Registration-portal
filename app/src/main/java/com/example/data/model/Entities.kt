@@ -8,12 +8,14 @@ data class UserEntity(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val username: String,
     val name: String,
-    val role: String, // STUDENT, SUPER_ADMIN, ADMIN, REGISTRATION_ADMIN, EXAM_ADMIN, QUESTION_ADMIN, RESULT_ADMIN, VOLUNTEER_COORDINATOR, VIEWER, Manager
+    val role: String = "STUDENT", // STUDENT, SUPER_ADMIN, ADMIN, REGISTRATION_ADMIN, EXAM_ADMIN, QUESTION_ADMIN, RESULT_ADMIN, VOLUNTEER_COORDINATOR, VIEWER, Manager
     val studentRegistrationId: String? = null,
+    val registrationNumber: String = "",
     val email: String,
     val mobile: String,
     val gender: String = "Male",
     val dateOfBirth: String = "2017-07-17 00:00:00",
+    val bloodGroup: String = "A+",
     val address: String = "",
     val bio: String = "",
     val lastIp: String = "103.166.170.13",
@@ -25,12 +27,19 @@ data class UserEntity(
     val createdAt: String = "2023-07-17 05:02:09",
     val updatedAt: String = "2026-08-23 09:00:45",
     val deletedAt: String = "",
+    // Student Registration Data Fields
     val instituteName: String = "",
+    val institutionType: String = "Bangla Medium",
     val className: String = "",
     val categoryName: String = "",
     val division: String = "",
     val district: String = "",
-    val upazila: String = ""
+    val upazila: String = "",
+    val guardianName: String = "",
+    val guardianRelation: String = "Parent",
+    val guardianMobile: String = "",
+    val registrationStatus: String = "VERIFIED", // PENDING, VERIFIED, REJECTED, COMPLETED
+    val registrationDate: Long = System.currentTimeMillis()
 )
 
 @Entity(tableName = "students")
@@ -123,7 +132,23 @@ data class ExamEntity(
     val totalQuestions: Int,
     val totalMarks: Double,
     val negativeMarkingRate: Double = 1.0,
-    val status: String = "SCHEDULED" // DRAFT, SCHEDULED, LIVE, ENDED, RESULT_PROCESSING, PUBLISHED
+    val status: String = "SCHEDULED", // DRAFT, SCHEDULED, LIVE, ENDED, RESULT_PROCESSING, PUBLISHED
+    // Student Progress Tracking Fields for BDJSO platform
+    val studentRegistrationId: String = "", // e.g. "BDJSO-2026-000101"
+    val studentName: String = "",
+    val progressPercentage: Int = 0, // 0 to 100%
+    val questionsAnswered: Int = 0,
+    val correctCount: Int = 0,
+    val wrongCount: Int = 0,
+    val currentScore: Double = 0.0,
+    val highestScore: Double = 0.0,
+    val isCompleted: Boolean = false,
+    val timeSpentSeconds: Long = 0L,
+    val attemptCount: Int = 0,
+    val lastAttemptDate: String = "",
+    val stage: String = "PRELIMINARY", // PRELIMINARY, REGIONAL, NATIONAL, CAMP
+    val rank: Int = 0,
+    val passed: Boolean = false
 )
 
 @Entity(tableName = "exam_attempts")

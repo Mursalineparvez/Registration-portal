@@ -71,6 +71,7 @@ import com.example.ui.screens.AdminUserEditScreen
 import com.example.ui.screens.AdminUserShowScreen
 import com.example.ui.screens.AdminUsersScreen
 import com.example.ui.screens.AdminVolunteersScreen
+import com.example.ui.screens.DataVisualizationDashboardScreen
 import com.example.ui.screens.ExamResultScreen
 import com.example.ui.screens.OnlineExamScreen
 import com.example.ui.screens.PublicHomeScreen
@@ -345,6 +346,10 @@ fun BdjsoMainApp(
                 AppScreen.ADMIN_USER_EDIT -> AdminUserEditScreen(viewModel)
                 AppScreen.ADMIN_USER_CHANGE_PASSWORD -> AdminUserChangePasswordScreen(viewModel)
                 AppScreen.ADMIN_REGISTRATION_STATS -> AdminRegistrationStatsScreen(viewModel)
+                AppScreen.DATA_VISUALIZATION_DASHBOARD -> DataVisualizationDashboardScreen(
+                    onBack = { viewModel.navigateTo(AppScreen.ADMIN_DASHBOARD) },
+                    viewModel = viewModel
+                )
             }
         }
     }

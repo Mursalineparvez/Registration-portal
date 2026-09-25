@@ -124,6 +124,31 @@ class BdjsoViewModel(application: Application) : AndroidViewModel(application) {
     val users: StateFlow<List<UserEntity>> = repository.users
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val registeredStudents: StateFlow<List<UserEntity>> = repository.registeredStudents
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun registerUser(user: UserEntity, onSuccess: (Long) -> Unit = {}) {
+        viewModelScope.launch {
+            val id = repository.registerUser(user)
+            showSnackbar("Registration submitted successfully: ${user.name}")
+            onSuccess(id)
+        }
+    }
+
+    fun updateStudentExamProgress(
+        examId: Long,
+        progress: Int,
+        answered: Int,
+        score: Double,
+        completed: Boolean,
+        timeSpent: Long = 0L,
+        lastAttemptDate: String = ""
+    ) {
+        viewModelScope.launch {
+            repository.updateStudentExamProgress(examId, progress, answered, score, completed, timeSpent, lastAttemptDate)
+        }
+    }
+
     // Exam Engine State
     private val _activeExam = MutableStateFlow<ExamEntity?>(null)
     val activeExam: StateFlow<ExamEntity?> = _activeExam.asStateFlow()

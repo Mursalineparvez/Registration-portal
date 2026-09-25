@@ -50,7 +50,7 @@ import androidx.room.withTransaction
         AuditLogEntity::class,
         SystemSettingEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class BdjsoDatabase : RoomDatabase() {
