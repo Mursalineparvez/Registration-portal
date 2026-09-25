@@ -216,6 +216,58 @@ class BdjsoRepository(private val database: BdjsoDatabase) {
         return attempt
     }
 
+    suspend fun saveQuizResult(
+        studentRegId: String,
+        studentName: String,
+        category: String,
+        schoolName: String,
+        district: String,
+        division: String,
+        score: Double,
+        totalMarks: Double,
+        correctCount: Int,
+        wrongCount: Int
+    ): Long {
+        val percentage = if (totalMarks > 0) (score / totalMarks) * 100.0 else 0.0
+        val selectionStatus = if (percentage >= 80.0) "SELECTED" else if (percentage >= 60.0) "WAITING_LIST" else "NOT_SELECTED"
+        val attempt = ExamAttemptEntity(
+            examId = 1L,
+            studentRegistrationId = studentRegId,
+            startTime = System.currentTimeMillis() - 600000,
+            submitTime = System.currentTimeMillis(),
+            answersJson = "{}",
+            markedForReviewJson = "[]",
+            score = score,
+            correctCount = correctCount,
+            wrongCount = wrongCount,
+            unattemptedCount = 0,
+            status = "EVALUATED"
+        )
+        database.examAttemptDao().insertAttempt(attempt)
+
+        val result = ResultEntity(
+            examId = 1L,
+            studentRegistrationId = studentRegId,
+            studentName = studentName,
+            categoryId = category,
+            schoolName = schoolName,
+            district = district,
+            division = division,
+            physicsMarks = kotlin.math.round((score * 0.4) * 10) / 10.0,
+            chemistryMarks = kotlin.math.round((score * 0.3) * 10) / 10.0,
+            biologyMarks = kotlin.math.round((score * 0.3) * 10) / 10.0,
+            mathMarks = 0.0,
+            totalMarks = score,
+            percentage = kotlin.math.round(percentage * 10) / 10.0,
+            rank = if (percentage >= 90.0) 1 else if (percentage >= 75.0) 2 else if (percentage >= 60.0) 3 else 4,
+            selectionStatus = selectionStatus,
+            isPublished = true
+        )
+        val resultId = database.resultDao().insertResult(result)
+        logAction("SUBMIT_QUIZ", studentRegId, "STUDENT", "QUIZ-$category", "Completed quiz scored $score/$totalMarks")
+        return resultId
+    }
+
     // Question Bank operations
     suspend fun insertQuestion(question: QuestionEntity, user: String, role: String): Long {
         val id = database.questionDao().insertQuestion(question)

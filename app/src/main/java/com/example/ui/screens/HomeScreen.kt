@@ -39,7 +39,10 @@ fun HomeScreen(
     onNavigateToQuestionBank: () -> Unit,
     onNavigateToSyllabus: () -> Unit,
     onNavigateToResults: () -> Unit,
-    onNavigateToGuide: () -> Unit
+    onNavigateToGuide: () -> Unit,
+    onNavigateToRegister: () -> Unit = {},
+    onNavigateToAdmin: () -> Unit = {},
+    onNavigateToDataVisualization: () -> Unit = {}
 ) {
     val currentUser by AuthRepository.currentUser.collectAsState()
     var selectedCategory by remember { mutableStateOf(OlympiadCategory.JUNIOR) }
@@ -198,6 +201,17 @@ fun HomeScreen(
                 modifier = Modifier.padding(horizontal = 16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                // Card 0: শিক্ষার্থী নিবন্ধন ও রেজিস্ট্রেশন ২০২৬ (Local Room Database Persistence)
+                ServiceListCard(
+                    title = "শিক্ষার্থী নিবন্ধন (Room DB রেজিস্ট্রেশন)",
+                    subtitle = "ডিভাইসের লোকাল ডাটাবেসে নতুন শিক্ষার্থী তথ্য সংরক্ষণ করুন",
+                    icon = Icons.Default.AppRegistration,
+                    iconBgColor = Color(0xFFE0F2FE),
+                    iconBorderColor = Color(0xFFBAE6FD),
+                    iconTint = Color(0xFF0284C7),
+                    onClick = onNavigateToRegister
+                )
+
                 // Card 1: কুইজ ও মক টেস্ট (Green Accent)
                 ServiceListCard(
                     title = "মক টেস্ট ও অলিম্পিয়াড কুইজ",
@@ -251,6 +265,28 @@ fun HomeScreen(
                     iconBorderColor = ServiceTealBorder,
                     iconTint = ServiceTeal,
                     onClick = onNavigateToGuide
+                )
+
+                // Card 6: এডমিন ও ম্যানেজমেন্ট প্যানেল (Admin Control & Management Portal)
+                ServiceListCard(
+                    title = "এডমিন ও ম্যানেজমেন্ট প্যানেল (Admin Portal)",
+                    subtitle = "শিক্ষার্থী ডাটাবেস, প্রশ্নব্যাংক, পরীক্ষা ও ফলাফল সম্পূর্ণ নিয়ন্ত্রণ",
+                    icon = Icons.Default.AdminPanelSettings,
+                    iconBgColor = Color(0xFFFEF3C7),
+                    iconBorderColor = Color(0xFFFDE68A),
+                    iconTint = Color(0xFFD97706),
+                    onClick = onNavigateToAdmin
+                )
+
+                // Card 7: ডাটা ভিজ্যুয়ালাইজেশন ও ট্রেন্ড ড্যাশবোর্ড (Recharts Trends)
+                ServiceListCard(
+                    title = "ডাটা ভিজ্যুয়ালাইজেশন ড্যাশবোর্ড (Analytics)",
+                    subtitle = "অংশগ্রহণ ট্রেন্ড ও বিষয়ভিত্তিক পরীক্ষার পারফরম্যান্স গ্রাফ (Recharts)",
+                    icon = Icons.AutoMirrored.Filled.TrendingUp,
+                    iconBgColor = Color(0xFFE0F2FE),
+                    iconBorderColor = Color(0xFFBAE6FD),
+                    iconTint = Color(0xFF0284C7),
+                    onClick = onNavigateToDataVisualization
                 )
             }
 

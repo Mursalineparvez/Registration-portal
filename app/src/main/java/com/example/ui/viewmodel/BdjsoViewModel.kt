@@ -52,7 +52,8 @@ enum class AppScreen {
     ADMIN_USER_SHOW,
     ADMIN_USER_EDIT,
     ADMIN_USER_CHANGE_PASSWORD,
-    ADMIN_REGISTRATION_STATS
+    ADMIN_REGISTRATION_STATS,
+    DATA_VISUALIZATION_DASHBOARD
 }
 
 class BdjsoViewModel(application: Application) : AndroidViewModel(application) {
@@ -158,6 +159,10 @@ class BdjsoViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             _currentScreen.value = AppScreen.ADMIN_DASHBOARD
         }
+    }
+
+    fun switchRole(role: String) {
+        _currentRole.value = role
     }
 
     fun setStudentRegId(regId: String) {
@@ -319,6 +324,35 @@ class BdjsoViewModel(application: Application) : AndroidViewModel(application) {
             _lastAttemptResult.value = attempt
             showSnackbar("Exam submitted successfully! Score: ${attempt.score}")
             _currentScreen.value = AppScreen.EXAM_RESULT
+        }
+    }
+
+    fun recordQuizResult(
+        studentRegId: String,
+        studentName: String,
+        category: String,
+        schoolName: String = "BDJSO School",
+        district: String = "Dhaka",
+        division: String = "Dhaka",
+        score: Double,
+        totalMarks: Double,
+        correctCount: Int,
+        wrongCount: Int
+    ) {
+        viewModelScope.launch {
+            repository.saveQuizResult(
+                studentRegId = studentRegId.ifBlank { _currentStudentRegId.value },
+                studentName = studentName.ifBlank { "Participant" },
+                category = category,
+                schoolName = schoolName,
+                district = district,
+                division = division,
+                score = score,
+                totalMarks = totalMarks,
+                correctCount = correctCount,
+                wrongCount = wrongCount
+            )
+            showSnackbar("Quiz result saved locally to Room Database!")
         }
     }
 

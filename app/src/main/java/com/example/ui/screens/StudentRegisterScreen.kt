@@ -20,7 +20,8 @@ import com.example.ui.viewmodel.BdjsoViewModel
 @Composable
 fun StudentRegisterScreen(
     viewModel: BdjsoViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -33,7 +34,10 @@ fun StudentRegisterScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { viewModel.navigateTo(AppScreen.HOME) }) {
+                    IconButton(onClick = {
+                        viewModel.navigateTo(AppScreen.HOME)
+                        onBack()
+                    }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -54,6 +58,12 @@ fun StudentRegisterScreen(
             item {
                 StudentRegistrationFormComponent(
                     onStudentRegistered = { data ->
+                        val catId = when {
+                            data.category.contains("Primary", ignoreCase = true) -> "PRIMARY"
+                            data.category.contains("Junior", ignoreCase = true) -> "JUNIOR"
+                            data.category.contains("Secondary", ignoreCase = true) -> "SECONDARY"
+                            else -> "SPECIAL"
+                        }
                         viewModel.registerStudent(
                             fullName = data.name,
                             banglaName = data.name,
@@ -61,7 +71,7 @@ fun StudentRegisterScreen(
                             gender = "Male",
                             bloodGroup = "B+",
                             className = data.gradeLevel,
-                            categoryId = data.category,
+                            categoryId = catId,
                             schoolName = data.school,
                             institutionType = "Bangla Medium",
                             division = "Dhaka",

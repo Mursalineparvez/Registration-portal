@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -31,6 +32,7 @@ import com.example.model.UserProfile
 import com.example.ui.components.CentralizedAdminDashboardComponent
 import com.example.ui.components.QuestionDiagram
 import com.example.ui.theme.*
+import com.example.ui.viewmodel.AppScreen
 import com.example.ui.viewmodel.BdjsoViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 
@@ -124,28 +126,34 @@ fun AdminDashboardScreen(
             contentPadding = PaddingValues(bottom = 96.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Three Tabs: Tab 0 is Registration Stat (Prominent & Default)
+            // Four Tabs: Tab 0 is Stats, Tab 1 is Modules (11), Tab 2 is Questions, Tab 3 is Users
             item {
                 Spacer(modifier = Modifier.height(4.dp))
-                TabRow(
+                ScrollableTabRow(
                     selectedTabIndex = selectedTab,
                     containerColor = SurfaceWhite,
-                    contentColor = PrimaryTeal
+                    contentColor = PrimaryTeal,
+                    edgePadding = 4.dp
                 ) {
                     Tab(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
-                        text = { Text("📊 Registration Stat", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
+                        text = { Text("📊 Overview & Stats", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
                     )
                     Tab(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
-                        text = { Text("Questions List", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
+                        text = { Text("⚙️ Modules (12)", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
                     )
                     Tab(
                         selected = selectedTab == 2,
                         onClick = { selectedTab = 2 },
-                        text = { Text("Users (${allUsers.size})", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
+                        text = { Text("❓ Questions", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
+                    )
+                    Tab(
+                        selected = selectedTab == 3,
+                        onClick = { selectedTab = 3 },
+                        text = { Text("👥 Users (${allUsers.size})", fontWeight = FontWeight.Bold, fontSize = 12.sp) }
                     )
                 }
                 Spacer(modifier = Modifier.height(4.dp))
@@ -180,6 +188,52 @@ fun AdminDashboardScreen(
                             color = PortalMutedText
                         )
                     }
+                }
+
+                // Quick Access Banner to Data Visualization Dashboard (Recharts)
+                item {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { viewModel.navigateTo(AppScreen.DATA_VISUALIZATION_DASHBOARD) },
+                        shape = RoundedCornerShape(10.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF0F172A))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF0284C7).copy(alpha = 0.25f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    Icons.Default.TrendingUp,
+                                    contentDescription = null,
+                                    tint = Color(0xFF38BDF8),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "📊 ডাটা ভিজ্যুয়ালাইজেশন ড্যাশবোর্ড (Recharts)",
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White
+                                )
+                                Text(
+                                    text = "অংশগ্রহণ বৃদ্ধি ও বিষয়ভিত্তিক পরীক্ষার স্কোর ট্রেন্ড দেখুন →",
+                                    fontSize = 10.sp,
+                                    color = Color(0xFF94A3B8)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
                 }
 
                 // Title Banner: Total Registration: 11,621 | Total Institutes: 4,740
@@ -307,8 +361,166 @@ fun AdminDashboardScreen(
                 }
             }
 
-            // === TAB 1: QUESTIONS LIST (from PDF Pages 6, 7, 14) ===
+            // === TAB 1: OPERATIONAL MODULES (11 Modules) ===
             if (selectedTab == 1) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = PrimaryDarkNavy)
+                    ) {
+                        Column(modifier = Modifier.padding(14.dp)) {
+                            Text(
+                                text = "BDJSO Admin Control Center",
+                                color = Color.White,
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = "নিচের যেকোনো মডিউলে ট্যাপ করে সরাসরি ব্যবস্থাপনা শুরু করুন",
+                                color = OlympiadGold,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            AdminModuleCard(
+                                title = "শিক্ষার্থী ডাটাবেস",
+                                subtitle = "নিবন্ধন অনুমোদন ও প্রোফাইল",
+                                icon = Icons.Default.People,
+                                color = ScienceTeal,
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_STUDENTS) }
+                            )
+                            AdminModuleCard(
+                                title = "প্রশ্নব্যাংক",
+                                subtitle = "পদার্থ, রসায়ন ও জীববিজ্ঞান",
+                                icon = Icons.Default.QuestionAnswer,
+                                color = OlympiadGold,
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_QUESTIONS) }
+                            )
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            AdminModuleCard(
+                                title = "পরীক্ষা ও মূল্যায়ন",
+                                subtitle = "পরীক্ষা শিডিউল ও রিভিউ",
+                                icon = Icons.Default.Assignment,
+                                color = ElectricCyan,
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_EXAMS) }
+                            )
+                            AdminModuleCard(
+                                title = "মেধা তালিকা ও ফলাফল",
+                                subtitle = "ক্যাম্প সিলেকশন ও রেজাল্ট",
+                                icon = Icons.Default.EmojiEvents,
+                                color = BdjsoEmerald,
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_RESULTS) }
+                            )
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            AdminModuleCard(
+                                title = "স্কুল ও প্রতিষ্ঠান",
+                                subtitle = "৮টি বিভাগের শিক্ষা প্রতিষ্ঠান",
+                                icon = Icons.Default.School,
+                                color = Color(0xFF6366F1),
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_SCHOOLS) }
+                            )
+                            AdminModuleCard(
+                                title = "স্বেচ্ছাসেবক দল",
+                                subtitle = "ক্যাম্পাস কোঅর্ডিনেটর",
+                                icon = Icons.Default.VolunteerActivism,
+                                color = Color(0xFFF43F5E),
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_VOLUNTEERS) }
+                            )
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            AdminModuleCard(
+                                title = "অফিসিয়াল ঘোষণা",
+                                subtitle = "নোটিশ ও ইভেন্ট আপডেট",
+                                icon = Icons.Default.Announcement,
+                                color = Color(0xFFF59E0B),
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_ANNOUNCEMENTS) }
+                            )
+                            AdminModuleCard(
+                                title = "অডিট লগ ও ট্রেইল",
+                                subtitle = "সিস্টেম ও সিকিউরিটি লগ",
+                                icon = Icons.Default.History,
+                                color = Color(0xFF64748B),
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_AUDIT_LOGS) }
+                            )
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            AdminModuleCard(
+                                title = "ডাটা ভিজ্যুয়ালাইজেশন (Recharts)",
+                                subtitle = "অংশগ্রহণ ও পরীক্ষার স্কোর ট্রেন্ডস",
+                                icon = Icons.Default.TrendingUp,
+                                color = Color(0xFF0284C7),
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.DATA_VISUALIZATION_DASHBOARD) }
+                            )
+                            AdminModuleCard(
+                                title = "রেজিস্ট্রেশন গ্রাফ",
+                                subtitle = "বিস্তারিত ডাটা অ্যানালিটিক্স",
+                                icon = Icons.Default.ShowChart,
+                                color = Color(0xFF0EA5E9),
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_REGISTRATION_STATS) }
+                            )
+                        }
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            AdminModuleCard(
+                                title = "ইউজার ও পারমিশন",
+                                subtitle = "ম্যানেজার ও শিক্ষার্থী অ্যাকাউন্ট",
+                                icon = Icons.Default.ManageAccounts,
+                                color = Color(0xFF10B981),
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_USERS) }
+                            )
+                            AdminModuleCard(
+                                title = "সিস্টেম সেটিংস",
+                                subtitle = "কনফিগারেশন ও সেটিংস",
+                                icon = Icons.Default.Settings,
+                                color = Color(0xFF475569),
+                                modifier = Modifier.weight(1f),
+                                onClick = { viewModel.navigateTo(AppScreen.ADMIN_SETTINGS) }
+                            )
+                        }
+                    }
+                }
+            }
+
+            // === TAB 2: QUESTIONS LIST (from PDF Pages 6, 7, 14) ===
+            if (selectedTab == 2) {
+                item {
+                    Button(
+                        onClick = { viewModel.navigateTo(AppScreen.ADMIN_QUESTIONS) },
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("প্রশ্নব্যাংক পরিচালনা ও নতুন প্রশ্ন যোগ করুন", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
                 // Header and Pagination (like "Questions List" & page buttons 1, 2)
                 item {
                     Card(
@@ -509,8 +721,22 @@ fun AdminDashboardScreen(
                 }
             }
 
-            // === TAB 2: USERS LIST (from PDF Pages 1, 8, 10, 11, 12, 13) ===
-            if (selectedTab == 2) {
+            // === TAB 3: USERS LIST (from PDF Pages 1, 8, 10, 11, 12, 13) ===
+            if (selectedTab == 3) {
+                item {
+                    Button(
+                        onClick = { viewModel.navigateTo(AppScreen.ADMIN_USERS) },
+                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryTeal),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.ManageAccounts, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text("সম্পূর্ণ ইউজার ও পারমিশন কন্ট্রোল প্যানেল", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                }
+
                 item {
                     OutlinedTextField(
                         value = userSearchQuery,
@@ -534,7 +760,10 @@ fun AdminDashboardScreen(
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 5.dp),
+                            .padding(vertical = 5.dp)
+                            .clickable {
+                                viewModel.selectUserByUsername(u.username, AppScreen.ADMIN_USER_SHOW)
+                            },
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
                         border = BorderStroke(1.dp, BorderLight)
@@ -591,6 +820,54 @@ fun AdminDashboardScreen(
                 topInstitutes = top15Institutes,
                 onDismiss = { showTotalInstitutesDialog = false }
             )
+        }
+    }
+}
+
+@Composable
+private fun AdminModuleCard(
+    title: String,
+    subtitle: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    color: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier.clickable { onClick() },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
+        border = BorderStroke(1.dp, BorderLight),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(color.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(22.dp))
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Column {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 13.sp,
+                    color = TextPrimary
+                )
+                Text(
+                    text = subtitle,
+                    fontSize = 10.sp,
+                    color = TextSecondary,
+                    maxLines = 1
+                )
+            }
         }
     }
 }

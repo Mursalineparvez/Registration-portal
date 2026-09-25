@@ -30,17 +30,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.BDJSOData
+import com.example.data.AuthRepository
 import com.example.model.OlympiadCategory
 import com.example.model.QuestionType
 import com.example.model.QuizQuestion
 import com.example.ui.components.QuestionDiagram
 import com.example.ui.theme.*
+import com.example.ui.viewmodel.BdjsoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuizScreen(
     initialCategory: OlympiadCategory = OlympiadCategory.PRIMARY,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    viewModel: BdjsoViewModel? = null
 ) {
     var selectedCategory by remember { mutableStateOf(initialCategory) }
     val questions = remember(selectedCategory) {
@@ -97,9 +100,37 @@ fun QuizScreen(
                     selectedAnswers[q.id] == q.correctIndex
                 }
             }
+            val currentUser by AuthRepository.currentUser.collectAsState()
+
+            LaunchedEffect(quizCompleted) {
+                if (viewModel != null) {
+                    val totalMarks = (questions.size * 4).toDouble()
+                    val scoreMarks = (score * 4).toDouble()
+                    val userRegId = currentUser?.username ?: viewModel.currentStudentRegId.value
+                    val userName = currentUser?.name ?: "Participant Student"
+                    val userSchool = currentUser?.instituteName?.ifBlank { "BDJSO School" } ?: "BDJSO School"
+                    val userDistrict = currentUser?.district?.ifBlank { "Dhaka" } ?: "Dhaka"
+                    val userDivision = currentUser?.division?.ifBlank { "Dhaka" } ?: "Dhaka"
+
+                    viewModel.recordQuizResult(
+                        studentRegId = userRegId,
+                        studentName = userName,
+                        category = selectedCategory.name,
+                        schoolName = userSchool,
+                        district = userDistrict,
+                        division = userDivision,
+                        score = scoreMarks,
+                        totalMarks = totalMarks,
+                        correctCount = score,
+                        wrongCount = questions.size - score
+                    )
+                }
+            }
+
             QuizResultDialog(
                 total = questions.size,
                 score = score,
+                isPersistedInRoom = viewModel != null,
                 onRestart = {
                     selectedAnswers.clear()
                     numericAnswers.clear()
@@ -574,6 +605,7 @@ fun QuizScreen(
 fun QuizResultDialog(
     total: Int,
     score: Int,
+    isPersistedInRoom: Boolean = false,
     onRestart: () -> Unit,
     onExit: () -> Unit
 ) {
@@ -619,7 +651,35 @@ fun QuizResultDialog(
             color = TextSecondary
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        if (isPersistedInRoom) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Surface(
+                color = Color(0xFFE8F8F5),
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(1.dp, Color(0xFFA2E9D4))
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = ServiceGreen,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = "ফলাফল লোকাল Room ডাটাবেসে সফলভাবে সংরক্ষিত হয়েছে",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = PrimaryTealDark
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
 
         Button(
             onClick = onRestart,

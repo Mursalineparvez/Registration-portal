@@ -34,9 +34,15 @@ import com.example.model.UserProfile
 import com.example.model.UserRole
 import com.example.ui.screens.*
 import com.example.ui.theme.*
+import com.example.ui.viewmodel.AppScreen
+import com.example.ui.viewmodel.BdjsoViewModel
+import androidx.activity.compose.BackHandler
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 enum class Screen(val titleBn: String, val titleEn: String, val icon: ImageVector) {
     HOME("হোম", "Home", Icons.Default.Home),
+    REGISTER("রেজিস্ট্রেশন", "Register", Icons.Default.AppRegistration),
     QUIZ("কুইজ", "Quiz", Icons.Default.Quiz),
     PAPERS("প্রশ্নব্যাংক", "Papers", Icons.Default.MenuBook),
     SYLLABUS("ল্যাব", "Lab", Icons.Default.Science),
@@ -62,12 +68,22 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainApp() {
+    val viewModel: BdjsoViewModel = viewModel()
     var currentScreen by remember { mutableStateOf(Screen.HOME) }
     var activeQuizCategory by remember { mutableStateOf(OlympiadCategory.JUNIOR) }
     var selectedPaperForModal by remember { mutableStateOf<PastPaper?>(null) }
     var useBanglaLanguage by remember { mutableStateOf(true) }
 
     val currentUser by AuthRepository.currentUser.collectAsState()
+
+    BackHandler(enabled = currentScreen == Screen.ADMIN) {
+        if (viewModel.currentScreen.value != AppScreen.ADMIN_DASHBOARD) {
+            viewModel.navigateTo(AppScreen.ADMIN_DASHBOARD)
+        } else {
+            currentScreen = Screen.HOME
+            viewModel.navigateTo(AppScreen.HOME)
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -213,7 +229,7 @@ fun MainApp() {
                         .fillMaxWidth()
                         .testTag("bottom_nav_bar")
                 ) {
-                    val navItems = if (currentUser?.role == UserRole.MANAGER || currentUser?.role == UserRole.ADMIN) {
+                    val navItems = if (currentUser?.role == UserRole.MANAGER || currentUser?.role == UserRole.ADMIN || currentScreen == Screen.ADMIN) {
                         listOf(Screen.HOME, Screen.QUIZ, Screen.PAPERS, Screen.ADMIN, Screen.PROFILE)
                     } else if (currentUser != null) {
                         listOf(Screen.HOME, Screen.QUIZ, Screen.PAPERS, Screen.RESULTS, Screen.PROFILE)
@@ -238,7 +254,13 @@ fun MainApp() {
                                 )
                             },
                             selected = isSelected,
-                            onClick = { currentScreen = screen },
+                            onClick = {
+                                if (screen == Screen.ADMIN) {
+                                    viewModel.switchRole("ADMIN")
+                                    viewModel.navigateTo(AppScreen.ADMIN_DASHBOARD)
+                                }
+                                currentScreen = screen
+                            },
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = PrimaryTeal,
                                 selectedTextColor = PrimaryTealDark,
@@ -267,12 +289,28 @@ fun MainApp() {
                     onNavigateToQuestionBank = { currentScreen = Screen.PAPERS },
                     onNavigateToSyllabus = { currentScreen = Screen.SYLLABUS },
                     onNavigateToResults = { currentScreen = Screen.RESULTS },
-                    onNavigateToGuide = { currentScreen = Screen.GUIDE }
+                    onNavigateToGuide = { currentScreen = Screen.GUIDE },
+                    onNavigateToRegister = { currentScreen = Screen.REGISTER },
+                    onNavigateToAdmin = {
+                        viewModel.switchRole("ADMIN")
+                        viewModel.navigateTo(AppScreen.ADMIN_DASHBOARD)
+                        currentScreen = Screen.ADMIN
+                    },
+                    onNavigateToDataVisualization = {
+                        viewModel.navigateTo(AppScreen.DATA_VISUALIZATION_DASHBOARD)
+                        currentScreen = Screen.ADMIN
+                    }
+                )
+
+                Screen.REGISTER -> StudentRegisterScreen(
+                    viewModel = viewModel,
+                    onBack = { currentScreen = Screen.HOME }
                 )
 
                 Screen.QUIZ -> QuizScreen(
                     initialCategory = activeQuizCategory,
-                    onBack = { currentScreen = Screen.HOME }
+                    onBack = { currentScreen = Screen.HOME },
+                    viewModel = viewModel
                 )
 
                 Screen.PAPERS -> QuestionBankScreen(
@@ -283,13 +321,26 @@ fun MainApp() {
 
                 Screen.SYLLABUS -> SyllabusScreen()
 
-                Screen.RESULTS -> ResultsScreen()
+                Screen.RESULTS -> ResultsScreen(
+                    viewModel = viewModel,
+                    onNavigateToTrends = {
+                        viewModel.navigateTo(AppScreen.DATA_VISUALIZATION_DASHBOARD)
+                        currentScreen = Screen.ADMIN
+                    }
+                )
 
                 Screen.GUIDE -> GuideScreen()
 
                 Screen.LOGIN -> LoginScreen(
                     onLoginSuccess = { user ->
-                        currentScreen = if (user.role == UserRole.MANAGER) Screen.ADMIN else Screen.PROFILE
+                        if (user.role == UserRole.MANAGER || user.role == UserRole.ADMIN) {
+                            viewModel.switchRole("ADMIN")
+                            viewModel.navigateTo(AppScreen.ADMIN_DASHBOARD)
+                            currentScreen = Screen.ADMIN
+                        } else {
+                            viewModel.switchRole("STUDENT")
+                            currentScreen = Screen.PROFILE
+                        }
                     },
                     onContinueAsGuest = {
                         currentScreen = Screen.HOME
@@ -306,6 +357,8 @@ fun MainApp() {
                                 currentScreen = Screen.HOME
                             },
                             onNavigateToAdminDashboard = {
+                                viewModel.switchRole("ADMIN")
+                                viewModel.navigateTo(AppScreen.ADMIN_DASHBOARD)
                                 currentScreen = Screen.ADMIN
                             }
                         )
@@ -317,9 +370,38 @@ fun MainApp() {
                     }
                 }
 
-                Screen.ADMIN -> AdminDashboardScreen(
-                    onBack = { currentScreen = Screen.HOME }
-                )
+                Screen.ADMIN -> {
+                    val adminSubScreen by viewModel.currentScreen.collectAsStateWithLifecycle()
+                    when (adminSubScreen) {
+                        AppScreen.ADMIN_STUDENTS -> AdminStudentsScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_QUESTIONS -> AdminQuestionsScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_EXAMS -> AdminExamsScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_RESULTS -> AdminResultsSelectionScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_SCHOOLS -> AdminSchoolsScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_VOLUNTEERS -> AdminVolunteersScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_ANNOUNCEMENTS -> AdminAnnouncementsScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_AUDIT_LOGS -> AdminAuditLogsScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_SETTINGS -> AdminSettingsScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_USERS -> AdminUsersScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_USER_SHOW -> AdminUserShowScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_USER_EDIT -> AdminUserEditScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_USER_CHANGE_PASSWORD -> AdminUserChangePasswordScreen(viewModel = viewModel)
+                        AppScreen.ADMIN_REGISTRATION_STATS -> AdminRegistrationStatsScreen(viewModel = viewModel)
+                        AppScreen.DATA_VISUALIZATION_DASHBOARD -> DataVisualizationDashboardScreen(
+                            onBack = {
+                                viewModel.navigateTo(AppScreen.ADMIN_DASHBOARD)
+                            },
+                            viewModel = viewModel
+                        )
+                        else -> AdminDashboardScreen(
+                            onBack = {
+                                currentScreen = Screen.HOME
+                                viewModel.navigateTo(AppScreen.HOME)
+                            },
+                            viewModel = viewModel
+                        )
+                    }
+                }
             }
 
             // Paper Preview Dialog
